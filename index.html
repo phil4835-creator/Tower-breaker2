@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tower Breaker: 100층의 도전</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Retro Font -->
     <link href="https://cdn.jsdelivr.net/gh/Dalgona/neodgm/neodgm.css" rel="stylesheet">
     <style>
         body { font-family: 'NeoDunggeunmo', sans-serif; background-color: #202020; }
@@ -21,18 +18,12 @@
                 0 -4px 0 0 white,
                 0 4px 0 0 white;
             margin: 4px;
-            border: 4px solid #2d3748; /* 내부 짙은 회색 테두리 */
-        }
-        
-        /* 얇은 픽셀 테두리 (버튼 등) */
-        .retro-border-sm {
-            box-shadow: inset 2px 2px 0px 0px #ffffff, inset -2px -2px 0px 0px #a1a1aa;
-            border: 2px solid #000;
+            border: 4px solid #2d3748;
         }
         
         .retro-btn:active {
-            box-shadow: inset 2px 2px 0px 0px #a1a1aa, inset -2px -2px 0px 0px #ffffff;
             transform: translateY(2px);
+            filter: brightness(0.9);
         }
 
         .custom-scrollbar::-webkit-scrollbar { width: 8px; }
@@ -44,87 +35,32 @@
             background-color: #1a1a1a;
             background-image: 
                 linear-gradient(335deg, rgba(255,255,255,0.05) 23px, transparent 23px),
-                linear-gradient(155deg, rgba(255,255,255,0.05) 23px, transparent 23px),
-                linear-gradient(335deg, rgba(255,255,255,0.05) 23px, transparent 23px),
                 linear-gradient(155deg, rgba(255,255,255,0.05) 23px, transparent 23px);
             background-size: 58px 58px;
         }
 
-        /* 체력바 애니메이션 */
-        .hp-fill { transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        
+        .hp-fill { transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .animate-float { animation: float 3s ease-in-out infinite; }
         @keyframes float {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-10px); }
         }
         
-        /* 등급별 텍스트 색상 */
-        .text-mythic { color: #dc2626; text-shadow: 1px 1px 0 #000; } /* Red */
-        .text-legendary { color: #d97706; text-shadow: 1px 1px 0 #000; } /* Amber/Gold */
-        .text-epic { color: #7c3aed; text-shadow: 1px 1px 0 #fff; } /* Purple */
-        .text-rare { color: #2563eb; } /* Blue */
-        .text-common { color: #374151; } /* Gray */
+        .text-mythic { color: #dc2626; text-shadow: 1px 1px 0 #000; } 
+        .text-legendary { color: #d97706; text-shadow: 1px 1px 0 #000; } 
+        .text-epic { color: #7c3aed; text-shadow: 1px 1px 0 #fff; } 
+        .text-rare { color: #2563eb; } 
+        .text-common { color: #374151; } 
     </style>
 </head>
 <body class="text-[#2c2c2c] select-none h-screen flex items-center justify-center overflow-hidden">
 
     <div id="app" class="w-full h-full flex items-center justify-center bg-[#1a1a1a]">
-        <!-- 앱 컨텐츠 -->
-        <div class="text-white text-xl animate-pulse">로딩 중...</div>
-    </div>
-
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "demo-api-key",
-            authDomain: "demo-project.firebaseapp.com",
-            projectId: "demo-project",
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'tower-breaker-game';
-
-        window.db = db;
-        window.auth = auth;
-        window.doc = doc;
-        window.getDoc = getDoc;
-        window.setDoc = setDoc;
-        window.appId = appId;
-        window.isAuthReady = false;
-
-        const initAuth = async () => {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.error("Auth Error:", error);
-            }
-        };
-        
-        initAuth();
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                window.currentUser = user;
-                window.isAuthReady = true;
-                if (window.render) window.render();
-            }
-        });
-    </script>
+        </div>
 
     <script>
-        // --- 상수 및 데이터 (전역 window 객체에 할당하여 에러 방지) ---
-        window.MAX_FLOOR = 100;
+        // --- 아이콘 정의 ---
+        // Lucide 아이콘 로드 확인
         window.ICONS = {
             sword: 'sword', shield: 'shield', heart: 'heart', zap: 'zap', 
             skull: 'skull', trendingUp: 'trending-up', refreshCw: 'refresh-cw',
@@ -174,6 +110,7 @@
         window.battleState = { barrierTurns: 0, turnCount: 1, cooldowns: {}, skillUsage: {} };
         window.augments = [];
         window.showSkillModal = false;
+        window.MAX_FLOOR = 100;
 
         // --- 데이터 DB (전역) ---
         window.JOB_SKILLS = {
@@ -214,6 +151,18 @@
                 { tier: 'EPIC', name: '영웅의 활', atk: 45 }, { tier: 'LEGENDARY', name: '주몽의 활', atk: 60 }, { tier: 'MYTHIC', name: '아르테미스의 활', atk: 100 }
             ]
         };
+
+        // --- 로컬 스토리지 저장/로드 시스템 (서버 대체) ---
+        function saveUserData(userId, data) {
+            const allUsers = JSON.parse(localStorage.getItem('tower_users') || '{}');
+            allUsers[userId] = data;
+            localStorage.setItem('tower_users', JSON.stringify(allUsers));
+        }
+
+        function loadUserData(userId) {
+            const allUsers = JSON.parse(localStorage.getItem('tower_users') || '{}');
+            return allUsers[userId];
+        }
 
         // --- 유틸리티 및 렌더링 헬퍼 ---
         function getIconHtml(name) {
@@ -356,7 +305,6 @@
             if (f === 30) return [1,2,3].map(() => createArmor('PANTS', '갑옷 바지', 5, 'shieldCheck'));
             if (f === 40) return [1,2,3].map(() => createArmor('SHOULDER', '견갑', 5, 'shield'));
             
-            // 50층 보조무기 (직업별 맞춤 + 고성능)
             if (f === 50) {
                 let subName = '보조무기';
                 let icon = 'star';
@@ -391,7 +339,6 @@
             const fixed = getFloorReward(window.state.floor);
             if (fixed) { window.augments = fixed; return; }
             
-             // 랜덤 증강 (1~9층) - 일반 스탯
              const statPool = [
                  { name: '근력 강화', desc: 'ATK +3', icon: 'sword', type: 'STAT', action: () => window.player.atk += 3 },
                  { name: '피부 경화', desc: 'DEF +1', icon: 'shield', type: 'STAT', action: () => window.player.def += 1 },
@@ -402,7 +349,6 @@
                  { name: '흡혈 본능', desc: '흡혈 +5%', icon: 'skull', type: 'STAT', action: () => window.player.lifesteal += 0.05 },
             ];
 
-            // 특수 능력 (가시성 개선을 위해 type: ABILITY 지정)
             const abilityPool = [
                  { name: '연속 사격', desc: '2회 공격 (뎀감 35%)', icon: 'repeat', type: 'ABILITY', cond: !window.player.abilities.doubleShot, action: () => window.player.abilities.doubleShot = true },
                  { name: '배리어', desc: '전투 시작 1턴 무적', icon: 'shieldCheck', type: 'ABILITY', cond: !window.player.abilities.barrier, action: () => window.player.abilities.barrier = true },
@@ -422,7 +368,7 @@
             }
         }
 
-        // --- 렌더링 컴포넌트 함수들 ---
+        // --- 렌더링 컴포넌트 ---
         function renderLogin() {
             return `
             <div class="w-full max-w-sm bg-white border-4 border-black p-6 rounded text-center shadow-[8px_8px_0_0_rgba(0,0,0,0.5)]">
@@ -430,9 +376,10 @@
                 <input id="login-id" type="text" placeholder="아이디" class="w-full p-3 mb-2 border-2 border-black text-lg font-bold bg-gray-100 focus:outline-none focus:bg-white" value="${state.user.id}" oninput="updateInput('id', this.value)">
                 <input id="login-pw" type="password" placeholder="비밀번호" class="w-full p-3 mb-6 border-2 border-black text-lg font-bold bg-gray-100 focus:outline-none focus:bg-white" value="${state.user.pw}" oninput="updateInput('pw', this.value)">
                 <button onclick="handleLogin()" class="w-full bg-black text-white py-3 border-2 border-black hover:bg-gray-800 font-bold text-xl mb-2 retro-btn">
-                   ${state.isLoading ? '로딩 중...' : '게임 시작'}
+                   게임 시작
                 </button>
                 <button onclick="setState('SIGNUP')" class="w-full bg-white text-black py-3 border-2 border-black hover:bg-gray-100 font-bold text-xl retro-btn">회원등록</button>
+                <p class="text-xs text-gray-500 mt-4">*데이터는 이 컴퓨터에 저장됩니다.</p>
             </div>`;
         }
 
@@ -619,7 +566,7 @@
 
             return `
             <div class="absolute inset-0 z-50 bg-black/80 flex flex-col items-center justify-center p-4">
-                <div class="paper-texture w-[90%] max-w-2xl h-auto max-h-[90%] rounded border-4 border-[#5d4037] p-6 shadow-2xl relative flex flex-col">
+                <div class="paper-texture w-[90%] max-w-2xl h-auto max-h-[90%] rounded border-4 border-[#5d4037] p-6 shadow-2xl relative flex flex-col bg-[#e6d5ac]">
                     <div class="text-center font-bold text-2xl text-[#5d4037] mb-4 border-b-4 border-[#5d4037] pb-2">⚔️ 기술 배치 🛡️</div>
                     <div class="flex-1 overflow-y-auto custom-scrollbar pr-2">
                         <div class="grid grid-cols-1 gap-1">
@@ -631,15 +578,11 @@
             </div>`;
         }
 
-        function renderBottomOverlay() {
-            return ''; // 로그창 내부 오버레이 제거 (전체 화면 모달로 대체)
-        }
-
         function renderGameOverlay() {
             if (window.state.gameState === 'AUGMENT') return renderAugment();
             if (window.state.gameState === 'CLASS_SELECT') return renderClassSelect();
             if (window.state.gameState === 'GAMEOVER' || window.state.gameState === 'VICTORY') return renderEndGame();
-            if (window.showSkillModal) return renderSkillModal(); // 스킬 모달 추가
+            if (window.showSkillModal) return renderSkillModal();
             return '';
         }
 
@@ -655,7 +598,6 @@
             return '';
         }
 
-        // --- 헬퍼 함수: 세트 효과 텍스트 생성 ---
         function getSetEffectText() {
             let texts = [];
             const mods = window.player.modifiers;
@@ -665,12 +607,10 @@
             return texts.length > 0 ? texts.join(' / ') : '';
         }
         
-        // --- 헬퍼 함수: 활성 능력 렌더링 ---
         function renderActiveAbilities() {
             const abils = window.player.abilities;
             const icons = [];
             
-            // 능력 매핑 (약식)
             if(abils.doubleShot) icons.push({icon:'repeat', color:'text-yellow-600', title:'연속 사격'});
             if(abils.shieldBearer) icons.push({icon:'shieldCheck', color:'text-blue-600', title:'방패병'});
             if(abils.barrier) icons.push({icon:'shieldCheck', color:'text-cyan-500', title:'배리어'});
@@ -689,11 +629,6 @@
             const app = document.getElementById('app');
             if (!app) return;
             
-            if (window.state.gameState === 'LOGIN' && !window.isAuthReady) {
-                app.innerHTML = '<div class="text-white text-xl animate-pulse">서버 연결 중...</div>';
-                return;
-            }
-
             if (['LOGIN', 'SIGNUP', 'START', 'DIFFICULTY_SELECT', 'SHOP'].includes(window.state.gameState)) {
                 app.innerHTML = renderOverlay();
                 window.lucide.createIcons();
@@ -703,7 +638,6 @@
             let html = `
             <div class="relative w-full max-w-5xl aspect-video bg-[#f0f0f0] flex flex-col retro-border overflow-hidden">
                 
-                <!-- 상단: 전투 화면 (65%) -->
                 <div class="flex-1 bg-white border-b-4 border-black relative overflow-hidden dungeon-bg">
                     
                     <div class="absolute top-2 left-2 right-2 flex justify-between text-white text-xs z-30 pointer-events-none">
@@ -714,7 +648,6 @@
                         </div>
                     </div>
 
-                    <!-- 1. 적 정보 (좌측 상단) -->
                     <div class="absolute top-4 left-4 z-20 bg-white border-2 border-black rounded p-2 shadow-[2px_2px_0_0_rgba(0,0,0,0.5)] min-w-[140px]">
                         <div class="flex justify-between items-center text-sm font-bold mb-1">
                             <span>${window.enemy.name}</span>
@@ -725,7 +658,6 @@
                         </div>
                     </div>
 
-                    <!-- 2. 적 캐릭터 (우측 상단, 작게) -->
                     <div class="absolute top-16 right-8 z-10 animate-float">
                         <div class="text-7xl filter drop-shadow-lg scale-x-[-1] transition-transform duration-300 transform hover:scale-110 cursor-crosshair">
                             ${window.enemy.img}
@@ -733,20 +665,17 @@
                         ${window.enemy.isGhost ? '<div class="absolute -top-4 -right-4 text-2xl">👻</div>' : ''}
                     </div>
 
-                    <!-- 3. 플레이어 캐릭터 (좌측 하단, 뒷모습 느낌) -->
                     <div class="absolute bottom-4 left-10 z-10">
                          <div class="text-8xl filter drop-shadow-xl">${getPlayerIcon()}</div>
                          ${window.battleState.barrierTurns > 0 ? '<div class="absolute -top-10 left-1/2 -translate-x-1/2 text-3xl animate-pulse">🛡️</div>' : ''}
                     </div>
 
-                    <!-- 4. 플레이어 정보 (우측 하단 - 확장됨) -->
                     <div class="absolute bottom-8 right-4 z-20 bg-white border-2 border-black rounded p-2 shadow-[2px_2px_0_0_rgba(0,0,0,0.5)] w-[340px]">
                         <div class="flex justify-between items-center text-sm font-bold mb-1">
                             <span>${window.player.class || '초보자'}</span>
                             <span class="text-xs">Lv.${window.state.floor}</span>
                         </div>
                         
-                        <!-- HP Bar -->
                         <div class="flex items-center gap-1 text-xs font-bold bg-yellow-100 px-1 rounded border border-black mb-1">
                             <span>HP</span>
                             <div class="flex-1 h-3 bg-gray-300 rounded border border-black relative overflow-hidden">
@@ -755,14 +684,12 @@
                             <span>${window.player.hp}/${window.player.maxHp}</span>
                         </div>
                         
-                        <!-- Stats Grid -->
                         <div class="grid grid-cols-3 gap-1 text-[10px] mb-2">
                            <div class="flex items-center gap-1 bg-gray-100 px-1 rounded"><i data-lucide="sword" size="10"></i> ${window.player.atk}</div>
                            <div class="flex items-center gap-1 bg-gray-100 px-1 rounded"><i data-lucide="shield" size="10"></i> ${window.player.def}</div>
                            <div class="flex items-center gap-1 bg-gray-100 px-1 rounded"><i data-lucide="zap" size="10"></i> ${Math.floor(window.player.critChance*100)}%</div>
                         </div>
 
-                        <!-- 장착 아이템 표시 (색상 적용) -->
                         <div class="border-t border-black pt-1 text-[9px] grid grid-cols-2 gap-x-2 gap-y-0.5 mb-1">
                             <span class="${getRarityColorClass(window.player.weaponRarity)} truncate">⚔️ ${window.player.weapon || '-'}</span>
                             <span class="${getRarityColorClass(window.player.armorRarity)} truncate">👕 ${window.player.armor || '-'}</span>
@@ -770,7 +697,6 @@
                             <span class="${getRarityColorClass(window.player.subWeaponRarity)} truncate">🛡️ ${window.player.subWeapon || '-'}</span>
                         </div>
                         
-                        <!-- 능력 및 세트 효과 -->
                         <div class="flex flex-wrap gap-1 border-t border-black pt-1">
                              ${renderActiveAbilities()}
                         </div>
@@ -780,10 +706,8 @@
                     </div>
                 </div>
 
-                <!-- 하단: 컨트롤 패널 (35%) -->
                 <div class="h-[35%] bg-[#202020] p-3 flex gap-3 border-t-4 border-black">
                     
-                    <!-- 왼쪽: 대화창 (로그) -->
                     <div class="flex-1 bg-white border-4 border-[#505050] rounded p-2 relative" style="box-shadow: inset 4px 4px 0px 0px #ced4da;">
                         <div id="log-container" class="h-full overflow-y-auto font-bold text-sm leading-relaxed custom-scrollbar p-1">
                             ${window.state.logs.length === 0 ? '<div class="text-gray-500 mt-2 text-center">야생의 몬스터가 나타났다!</div>' : ''}
@@ -795,7 +719,6 @@
                         </div>
                     </div>
 
-                    <!-- 오른쪽: 커맨드 메뉴 (2x2 그리드) -->
                     <div class="w-44 bg-white border-4 border-[#505050] rounded p-1" style="box-shadow: inset 4px 4px 0px 0px #ced4da;">
                          <div class="grid grid-cols-2 grid-rows-2 gap-1 h-full">
                             <button onclick="playerTurn('ATTACK')" ${window.state.gameState !== 'BATTLE' ? 'disabled' : ''} class="retro-btn bg-[#f8f9fa] hover:bg-[#e9ecef] border-2 border-[#adb5bd] rounded flex items-center justify-center text-lg font-bold group">
@@ -834,76 +757,62 @@
             if (confirm("정말 포기하고 마을로 돌아갈까?")) {
                 window.setState('DIFFICULTY_SELECT');
                 window.addLog("도전을 포기하고 귀환했습니다.", 'system');
+                // 저장
+                if(window.state.user.id) {
+                     const data = loadUserData(window.state.user.id) || {};
+                     data.totalGold = window.state.totalGold;
+                     saveUserData(window.state.user.id, data);
+                }
             }
         };
 
-        // --- Action Handlers ---
+        // --- Action Handlers (Modified for LocalStorage) ---
         
         window.handleLogin = async () => {
-            if (!window.isAuthReady) { alert("서버 연결 중입니다. 잠시 후 다시 시도해주세요."); return; }
             const idInput = document.getElementById('login-id').value;
             const pwInput = document.getElementById('login-pw').value;
             if (!idInput || !pwInput) return alert('아이디와 비번을 입력해주세요.');
 
-            window.state.isLoading = true;
-            window.render();
-
-            try {
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'rpg_users', idInput);
-                const snap = await getDoc(docRef);
+            const data = loadUserData(idInput);
+            
+            if (data && data.password === pwInput) {
+                window.state.user.id = idInput;
+                window.state.totalGold = data.totalGold || 0;
+                window.state.shopStats = data.shopStats || { atk: 0, def: 0, hp: 0, epic: 0, legendary: 0, mythic: 0 };
                 
-                if (snap.exists() && snap.data().password === pwInput) {
-                    window.state.user.id = idInput;
-                    window.state.totalGold = snap.data().totalGold || 0;
-                    window.state.shopStats = snap.data().shopStats || { atk: 0, def: 0, hp: 0, epic: 0, legendary: 0, mythic: 0 };
-                    
-                    window.setState('START');
-                    window.addLog(`환영합니다, ${idInput}님!`, 'system');
-                } else {
-                    alert('정보가 일치하지 않습니다.');
-                }
-            } catch(e) { 
-                console.error(e); 
-                if (e.code === 'permission-denied') {
-                    alert('서버 접근 권한이 없습니다. 관리자에게 문의하세요.');
-                } else {
-                    alert('로그인 오류가 발생했습니다.');
-                }
-            } finally {
-                window.state.isLoading = false;
-                window.render();
+                window.setState('START');
+                window.addLog(`환영합니다, ${idInput}님!`, 'system');
+            } else {
+                alert('아이디가 없거나 비밀번호가 틀렸습니다.');
             }
         };
 
         window.handleSignup = async () => {
-             if (!window.isAuthReady) { alert("서버 연결 중입니다. 잠시 후 다시 시도해주세요."); return; }
              const id = document.getElementById('signup-id').value;
              const pw = document.getElementById('signup-pw').value;
              const cf = document.getElementById('signup-confirm').value;
              if(!id || !pw) return alert('입력해주세요');
              if(pw !== cf) return alert('비번 불일치');
              
-             window.state.isLoading = true;
-             window.render();
-             
-             try {
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'rpg_users', id);
-                const snap = await getDoc(docRef);
-                if(snap.exists()) {
-                    alert('이미 존재하는 아이디입니다.');
-                } else {
-                    await setDoc(docRef, { password: pw, totalGold: 0, shopStats: { atk:0, def:0, hp:0, epic:0, legendary:0, mythic:0 } });
-                    alert('가입 완료! 로그인해주세요.');
-                    window.setState('LOGIN');
-                }
-             } catch(e) { 
-                console.error(e); 
-                alert('가입 중 오류가 발생했습니다.');
-            } finally {
-                 window.state.isLoading = false;
-                 window.render();
+             const data = loadUserData(id);
+             if(data) {
+                 alert('이미 존재하는 아이디입니다.');
+             } else {
+                 saveUserData(id, { password: pw, totalGold: 0, shopStats: { atk:0, def:0, hp:0, epic:0, legendary:0, mythic:0 } });
+                 alert('가입 완료! 로그인해주세요.');
+                 window.setState('LOGIN');
              }
         };
+
+        // 게임 저장 로직 추가 (아이템 구매 시 등)
+        function saveGame() {
+            if(window.state.user.id) {
+                const data = loadUserData(window.state.user.id) || {};
+                data.totalGold = window.state.totalGold;
+                data.shopStats = window.state.shopStats;
+                saveUserData(window.state.user.id, data);
+            }
+        }
 
         window.startNewGame = (diff) => {
             window.state.difficulty = diff;
@@ -935,7 +844,6 @@
             
             if (floorVal === 100) { name = '마왕'; icon = '👿'; hp = 1000; atk = 100; }
             else if (isMidBoss) {
-                // 너프 적용
                 const bosses = [
                     {n:'오우거 대장', i:'👹', h:60, a:10},
                     {n:'자이언트 스파이더', i:'🕷️', h:120, a:15},
@@ -1033,7 +941,7 @@
             
             let critRate = window.player.critChance;
             if(window.player.abilities.berserker && (window.player.hp/window.player.maxHp) <= 0.3) critRate += 0.5;
-            if(window.player.class === '궁수' && window.player.skills.includes(1)) critRate += 0.3; // 집중력 강화
+            if(window.player.class === '궁수' && window.player.skills.includes(1)) critRate += 0.3; 
             
             if(Math.random() < critRate && !window.enemy.isGhost) {
                 dmg = Math.floor(dmg * 1.5);
@@ -1048,7 +956,6 @@
                 const heal = Math.floor(dmg * window.player.lifesteal);
                 if(heal > 0) {
                     window.player.hp = Math.min(window.player.maxHp, window.player.hp + heal);
-                    // window.addLog(`체력 ${heal} 흡수`, 'heal'); // 로그 너무 많아서 생략
                 }
             }
         }
@@ -1097,13 +1004,14 @@
 
                 if(window.player.abilities.investmentExpert) gold += 3;
                 window.state.totalGold += gold;
+                saveGame(); // 골드 저장
                 window.addLog(`${gold}G를 얻었다!`, 'system');
                 
                 if(window.player.abilities.soulReaper) { window.player.maxHp += 5; window.player.hp += 5; }
                 if(window.player.abilities.bulkUp) window.player.atk += 3;
                 if(window.player.abilities.learningBlade && window.state.floor % 10 === 0 && window.state.floor !== 100) {
-                     window.player.maxHp+=50; window.player.hp+=50; window.player.atk+=30; window.player.def+=20;
-                     window.addLog('학습하는 칼날 효과!', 'win');
+                      window.player.maxHp+=50; window.player.hp+=50; window.player.atk+=30; window.player.def+=20;
+                      window.addLog('학습하는 칼날 효과!', 'win');
                 }
 
                 if(window.state.floor >= MAX_FLOOR) window.setState('VICTORY');
@@ -1179,6 +1087,7 @@
             if(window.state.totalGold >= cost) {
                 window.state.totalGold -= cost;
                 window.state.shopStats[type]++;
+                saveGame(); // 구매 시 저장
                 window.render();
             } else {
                 alert('골드 부족');
